@@ -1,0 +1,109 @@
+
+    /* Checkout Steps */
+    /* Custom Navbar */
+.navbar-custom {
+  background: #fff;               /* White background */
+  border-bottom: 1px solid #ddd;  /* Thin bottom border */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Soft shadow */
+  z-index: 1000;                  /* Keeps it on top */
+}
+
+.navbar-custom .navbar-brand h4 {
+  color: #ff3f6c;   /* Myntra-like brand color */
+  margin: 0;
+  font-weight: bold;
+}
+
+.checkout-steps {
+  display: flex;
+  gap: 50px;
+  font-weight: 500;
+  font-size: 18px;
+  margin: 0 40px;
+}
+
+.checkout-steps span {
+  padding-bottom: 5px;
+  cursor: pointer;
+}
+
+.checkout-steps .active {
+  color: #ff3f6c;
+  border-bottom: 2px solid #ff3f6c;
+}
+
+.navbar-custom h3 {
+  font-size: 18px;
+  margin: 0;
+  color: #28a745;  /* Green for secure text */
+  font-weight: 600;
+}
+
+    .checkout-steps {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin: 15px 0;
+      font-weight: 500;
+      font-size: 18px;
+    }
+    .checkout-steps span {
+      padding-bottom: 5px;
+    }
+    .checkout-steps .active {
+      color: #ff3f6c;
+      border-bottom: 2px solid #ff3f6c;
+    }
+
+    /* Address Card */
+    .address-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #fff;
+      position: relative;
+    }
+    .address-card input[type="radio"] {
+      margin-right: 10px;
+    }
+    .address-actions {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+    .address-actions button {
+      margin-left: 5px;
+    }
+
+
+
+    body { background: #f1f3f6; }
+    .checkout-container { max-width: 1100px; margin: 20px auto; }
+    .card-custom { border-radius: 10px; box-shadow: 0px 2px 8px rgba(0,0,0,0.1); }
+    .order-summary { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0px 2px 8px rgba(0,0,0,0.1); }
+    .btn-place-order { background: #fb641b; color: #fff; font-weight: bold; }
+    .btn-place-order:hover { background: #e65a15; color: #fff; }
+
+
+
+ .success-icon {
+      font-size: 80px;
+      color: #28a745;
+    }
+
+ .order-summary {
+     background: white;
+     padding: 20px;
+     border-radius: 10px;
+     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+ .order-summary h5 {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+        }
+
+  .btn-actions {
+    margin-top: 20px;
+  }

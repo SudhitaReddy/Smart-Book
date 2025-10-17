@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Order - BookSmartNav</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="index.html">
+                <h4>BookSmartNav</h4>
+            </a>
+
+            <!-- Navigation Links -->
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="order-history.html">My Orders</a>
+                <a class="nav-link" href="cart.html">Cart</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h4><i class="fas fa-truck"></i> Track Your Order</h4>
+                        <p class="text-muted">Enter your order number to track your package</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Search Form -->
+                        <div class="mb-4">
+                            <form id="tracking-form">
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control-lg" 
+                                           id="order-number" placeholder="Enter Order Number (e.g., ORD123456)" 
+                                           required>
+                                    <button class="btn btn-primary btn-lg" type="submit">
+                                        <i class="fas fa-search"></i> Track Order
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Order Details -->
+                        <div id="order-details" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Order Information</h6>
+                                    <div id="order-info">
+                                        <!-- Order info will be loaded here -->
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Delivery Address</h6>
+                                    <div id="delivery-address">
+                                        <!-- Delivery address will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Order Items -->
+                            <h6>Order Items</h6>
+                            <div id="order-items">
+                                <!-- Order items will be loaded here -->
+                            </div>
+
+                            <hr>
+
+                            <!-- Tracking Timeline -->
+                            <h6>Order Status Timeline</h6>
+                            <div id="tracking-timeline">
+                                <!-- Timeline will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- No Results -->
+                        <div id="no-results" class="text-center" style="display: none;">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5>Order Not Found</h5>
+                            <p class="text-muted">Please check your order number and try again.</p>
+                        </div>
+
+                        <!-- Loading -->
+                        <div id="loading" class="text-center" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Searching for your order...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6><i class="fas fa-question-circle"></i> Need Help?</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Can't find your order number?</strong></p>
+                                <p>Check your email for the order confirmation or visit your <a href="order-history.html">order history</a>.</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Order taking too long?</strong></p>
+                                <p>Contact our customer support for assistance with delayed orders.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/tracking.js"></script>
+</body>
+</html>

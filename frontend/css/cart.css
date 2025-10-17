@@ -1,0 +1,47 @@
+/* Cart Image */
+.cart-img {
+  width: 120px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Cart Summary */
+.cart-summary {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 12px;
+  background: #fff;
+  position: sticky;
+  top: 80px;
+}
+
+/* Quantity Buttons */
+.qty-btn {
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qty-btn:hover {
+  background: #f1f1f1;
+}
+
+/* Remove & Wishlist Links */
+.btn-link {
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.coupon-box input {
+  font-size: 14px;
+  padding: 8px;
+}
+
+.coupon-box button {
+  font-size: 14px;
+  font-weight: 600;
+}

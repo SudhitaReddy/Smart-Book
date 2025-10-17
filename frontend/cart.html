@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/cart.css">
+</head>
+<body class="bg-light">
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><h4>Smart Book</h4></a>
+
+      <!-- ✅ Hamburger toggle -->
+      <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
+        
+
+        <div class="icon-links d-flex ms-lg-auto mt-3 mt-lg-0">
+          <div class="profile-menu">
+            <a href="#" onclick="toggleProfileMenu(event)"><i class="fa fa-user"></i></a>
+            <div class="profile-menu-content" id="profileMenu"></div>
+          </div>
+          <a href="wishlist.html"><i class="fa fa-heart"></i></a>
+          <a href="cart.html" class="cart-icon">
+            <i class="fa fa-shopping-cart"></i><span class="cart-count">0</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+
+  <!-- CART CONTAINER -->
+  <div class="container py-5">
+    <div class="row g-4">
+      <div class="col-lg-8" id="cart-items-container"><!-- JS fills this --></div>
+
+      <div class="col-lg-4">
+        <div class="cart-summary shadow-sm">
+          <h5>PRICE DETAILS</h5>
+          <hr>
+          <p class="d-flex justify-content-between">
+            <span>Price (<span id="item-count">0</span> items)</span>
+            <span id="subtotal">₹0</span>
+          </p>
+          <p class="d-flex justify-content-between text-success">
+            <span>Discount</span>
+            <span id="discount">-₹0</span>
+          </p>
+          <p class="d-flex justify-content-between">
+            <span>Delivery Charges</span>
+            <span class="text-success">Free</span>
+          </p>
+
+          <!-- ✅ Coupons -->
+          <div class="coupon-box mt-3">
+            <input type="text" id="couponInput" class="form-control" placeholder="Enter coupon code">
+            <button class="btn btn-outline-dark w-100 mt-2" onclick="applyCoupon()">Apply</button>
+            <small id="couponMsg" class="text-success d-block mt-1"></small>
+          </div>
+
+          <hr>
+          <h5 class="d-flex justify-content-between">
+            <span>Total Amount</span>
+            <span id="total">₹0</span>
+          </h5>
+          <a href="checkout.html">
+            <button class="btn btn-danger w-100 mt-3">PLACE ORDER</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h4>Smart Book</h4>
+        <p>Your trusted online bookstore for fiction, non-fiction, and educational books.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#fiction">Fiction</a></li>
+          <li><a href="#non-fiction">Non Fiction</a></li>
+          <li><a href="#education">Education</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Customer Service</h4>
+        <ul>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="#shipping">Shipping Info</a></li>
+          <li><a href="#returns">Returns</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Connect With Us</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Smart Book. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>

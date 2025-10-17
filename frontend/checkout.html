@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout - BookSmartNav</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/checkout.css"/>
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><h4>BookSmartNav</h4></a>
+
+      <!-- Steps (start at Shipping) -->
+      <div class="checkout-steps d-none d-md-flex">
+        <div class="step active" data-step="2">
+          <i class="fas fa-truck"></i><span>Shipping</span>
+        </div>
+        <div class="step" data-step="3">
+          <i class="fas fa-credit-card"></i><span>Payment</span>
+        </div>
+        <div class="step" data-step="4">
+          <i class="fas fa-check-circle"></i><span>Review</span>
+        </div>
+        <div class="step" data-step="5">
+          <i class="fas fa-gift"></i><span>Success</span>
+        </div>
+      </div>
+
+      <div class="secure-badge">
+        <i class="fas fa-shield-alt"></i><span>100% Secure</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="container mt-4 mb-5">
+    <div class="row g-4">
+      <!-- Left Column -->
+      <div class="col-lg-8">
+
+        <!-- Step 2: Shipping (kept your original look/fields) -->
+        <div class="checkout-step" id="step-2">
+          <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+              <h5 class="mb-0"><i class="fas fa-truck"></i> Shipping Address</h5>
+
+              <!-- Back to Cart -->
+              <a id="back-to-cart" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back to Cart
+              </a>
+            </div>
+
+            <div class="card-body">
+              <!-- Saved Addresses -->
+              <div id="saved-addresses" class="mb-4">
+                <h6>Select Address</h6>
+                <div id="address-list"><!-- radio cards injected here --></div>
+                <button class="btn btn-outline-primary mt-2" onclick="showAddressForm()">
+                  <i class="fas fa-plus"></i> Add New Address
+                </button>
+              </div>
+
+              <!-- Add New Address Form -->
+              <div id="address-form-container" class="card" style="display:none;">
+                <div class="card-header"><h6 class="mb-0">Add New Address</h6></div>
+                <div class="card-body">
+                  <form id="address-form">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="address-name" required/>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" id="address-phone" required/>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Street Address *</label>
+                      <textarea class="form-control" id="address-street" rows="2" required></textarea>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">City *</label>
+                        <input type="text" class="form-control" id="address-city" required/>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">State *</label>
+                        <input type="text" class="form-control" id="address-state" required/>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">ZIP Code *</label>
+                        <input type="text" class="form-control" id="address-zip" required/>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">Address Type</label>
+                        <select class="form-control" id="address-type">
+                          <option value="home">Home</option>
+                          <option value="work">Work</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <div class="form-check mt-4">
+                          <input class="form-check-input" type="checkbox" id="address-default"/>
+                          <label class="form-check-label" for="address-default">
+                            Set as default address
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                      <button type="submit" class="btn btn-primary">Save Address</button>
+                      <button type="button" class="btn btn-secondary" onclick="hideAddressForm()">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="text-end mt-3">
+                <button class="btn btn-primary" id="shipping-continue" onclick="nextStep()" disabled>
+                  Continue to Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Payment (realistic UI) -->
+        <div class="checkout-step" id="step-3" style="display:none;">
+          <div class="card">
+            <div class="card-header"><h5 class="mb-0"><i class="fas fa-credit-card"></i> Payment</h5></div>
+            <div class="card-body">
+
+              <div class="list-group mb-3" id="payment-options">
+                <label class="list-group-item d-flex align-items-center">
+                  <input class="form-check-input me-2" type="radio" name="payment-method" value="cod" checked/>
+                  <i class="fas fa-money-bill-wave me-2"></i> Cash on Delivery
+                </label>
+
+                <label class="list-group-item d-flex align-items-center">
+                  <input class="form-check-input me-2" type="radio" name="payment-method" value="upi"/>
+                  <i class="fas fa-mobile-alt me-2"></i> UPI
+                </label>
+                <div id="pay-upi" class="border rounded p-3 mt-2" style="display:none;">
+                  <label class="form-label">UPI ID (e.g. yourname@oksbi)</label>
+                  <input type="text" id="upi-id" class="form-control" placeholder="name@bank"/>
+                </div>
+
+                <label class="list-group-item d-flex align-items-center mt-2">
+                  <input class="form-check-input me-2" type="radio" name="payment-method" value="card"/>
+                  <i class="fas fa-credit-card me-2"></i> Credit / Debit Card
+                </label>
+                <div id="pay-card" class="border rounded p-3 mt-2" style="display:none;">
+                  <div class="row g-2">
+                    <div class="col-12">
+                      <label class="form-label">Card Number</label>
+                      <input type="text" id="card-number" maxlength="19" class="form-control" placeholder="XXXX XXXX XXXX XXXX"/>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Name on Card</label>
+                      <input type="text" id="card-name" class="form-control" placeholder="Full Name"/>
+                    </div>
+                    <div class="col-4 col-md-3">
+                      <label class="form-label">Expiry</label>
+                      <input type="text" id="card-exp" maxlength="5" class="form-control" placeholder="MM/YY"/>
+                    </div>
+                    <div class="col-4 col-md-3">
+                      <label class="form-label">CVV</label>
+                      <input type="password" id="card-cvv" maxlength="4" class="form-control" placeholder="***"/>
+                    </div>
+                  </div>
+                </div>
+
+                <label class="list-group-item d-flex align-items-center mt-2">
+                  <input class="form-check-input me-2" type="radio" name="payment-method" value="netbanking"/>
+                  <i class="fas fa-university me-2"></i> Net Banking
+                </label>
+                <div id="pay-netbanking" class="border rounded p-3 mt-2" style="display:none;">
+                  <label class="form-label">Select Bank</label>
+                  <select id="nb-bank" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option>HDFC Bank</option>
+                    <option>ICICI Bank</option>
+                    <option>SBI</option>
+                    <option>Axis Bank</option>
+                    <option>Kotak Mahindra</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="text-end">
+                <button class="btn btn-secondary me-2" onclick="prevStep()">Back</button>
+                <button class="btn btn-primary" id="to-review">Continue to Review</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Review -->
+        <div class="checkout-step" id="step-4" style="display:none;">
+          <div class="card">
+            <div class="card-header"><h5 class="mb-0"><i class="fas fa-check-circle"></i> Review & Confirm</h5></div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Shipping Address</h6>
+                  <div id="selected-address"></div>
+                </div>
+                <div class="col-md-6">
+                  <h6>Payment</h6>
+                  <div id="selected-payment"></div>
+                </div>
+              </div>
+
+              <hr/>
+
+              <h6>Order Summary</h6>
+              <div id="order-summary"></div>
+
+              <div class="text-end mt-3">
+                <button class="btn btn-secondary me-2" onclick="prevStep()">Back</button>
+                <button class="btn btn-success" id="place-order">
+                  <i class="fas fa-lock me-1"></i> Place Order
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: Success -->
+        <div class="checkout-step" id="step-5" style="display:none;">
+          <div class="card text-center">
+            <div class="card-body">
+              <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+              <h4 class="text-success">Order Placed Successfully!</h4>
+              <p class="text-muted">Thank you for your purchase. Your order has been confirmed.</p>
+              <div id="order-details"></div>
+              <div class="mt-4">
+                <a href="index.html" class="btn btn-primary me-2">Continue Shopping</a>
+                <a href="order-history.html" class="btn btn-outline-primary">View Order History</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Sticky Summary -->
+      <div class="col-lg-4">
+        <div class="card sticky-top" style="top:100px;">
+          <div class="card-header"><h6 class="mb-0">Order Summary</h6></div>
+          <div class="card-body" id="order-summary-sidebar"><!-- injected --></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/checkout.js"></script>
+</body>
+</html>
