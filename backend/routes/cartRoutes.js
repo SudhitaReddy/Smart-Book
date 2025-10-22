@@ -1,7 +1,7 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const Cart = require("../models/cart");
-const Product = require("../models/Product");
+const Product = require("../models/product");
 const { protect } = require("../middleware/auth");
 
 const router = express.Router();
