@@ -16,7 +16,7 @@ const sellerController = require("../controllers/sellerController");
 router.get("/dashboard", protect, authorize("admin"), async (req, res) => {
   try {
     const User = require("../models/user");
-    const Product = require("../models/Product");
+    const Product = require("../models/product");
     const Order = require("../models/order");
     const Seller = require("../models/seller");
     const SellerRequest = require("../models/sellerRequest"); // if using separate model

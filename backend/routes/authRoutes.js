@@ -181,13 +181,7 @@ router.post("/forgot-password", [body("email").isEmail()], async (req, res) => {
   }
 });
 
-// ===============================
-// RESET PASSWORD
-// ===============================
-// ===============================
-// RESET PASSWORD
-// ===============================
-// ===============================
+
 // RESET PASSWORD
 // ===============================
 router.put("/reset-password/:token", async (req, res) => {

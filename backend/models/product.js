@@ -37,4 +37,4 @@ const productSchema = new mongoose.Schema({
   isBestSeller: { type: Boolean, default: false }
 }, { timestamps: true });
 
-module.exports = mongoose.models.Product || mongoose.model("Product", productSchema);
+module.exports = mongoose.models.product || mongoose.model("product", productSchema);
