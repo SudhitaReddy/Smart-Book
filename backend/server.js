@@ -6,36 +6,34 @@ const connectDB = require("./config/db");
 const Product = require("./models/product");
 const allbooks = require("./data");
 const mongoose = require("mongoose");
-
 const sendEmail = require("./utils/sendEmail");
 
 const app = express();
 
 // ================================
-// CORS Config
+// ✅ CORS Configuration (Fixed)
 // ================================
-const devOrigins = [
-  "http://localhost:3000",   // React dev server
-  "http://127.0.0.1:5500",   // VS Code Live Server (127)
-  "http://localhost:5500",   // VS Code Live Server (localhost)
-  "null"                     // Allow file:// (origin = null)
+const allowedOrigins = [
+  "http://127.0.0.1:5500",              // VS Code Live Server
+  "http://localhost:5500",              // Alternate Live Server
+  "https://smart-book-172w.onrender.com", // Your deployed backend (Render)
+  "https://smart-book-frontend.onrender.com" // Add your frontend render link (if deployed later)
 ];
-
-const prodOrigins = [
-  "https://yourfrontend.com",
-  "https://yourdashboard.com"
-];
-
-const allowedOrigins =
-  process.env.NODE_ENV === "production" ? prodOrigins : devOrigins;
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman/curl
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS: " + origin));
+      // Allow requests from tools like Postman or curl (no origin)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.warn("🚫 Blocked by CORS:", origin);
+        return callback(new Error("Not allowed by CORS: " + origin));
+      }
     },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
@@ -54,7 +52,7 @@ app.get("/", (req, res) => {
 app.get("/test-email", async (req, res) => {
   try {
     await sendEmail(
-      "yourpersonalemail@gmail.com", 
+      "yourpersonalemail@gmail.com",
       "Test Email from BookSmart",
       "<h1>Hello ✅ Your email setup is working!</h1>"
     );
@@ -78,6 +76,7 @@ app.use("/api/seller", require("./routes/sellerRequestRoutes"));
 app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 
+// ================================
 // Insert / Refresh books on startup
 // ================================
 const insertInitialBooks = async () => {
