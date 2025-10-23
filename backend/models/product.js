@@ -23,8 +23,8 @@ const productSchema = new mongoose.Schema({
   images: [imageSchema],
 
   // Ratings & reviews
-  rating: { type: Number, default: 0, min: 0, max: 5 },  // average rating
-  reviewsCount: { type: Number, default: 0 },            // ✅ number of reviews only
+  rating: { type: Number, default: 0, min: 0, max: 5 },
+  reviewsCount: { type: Number, default: 0 },
 
   // Relations
   seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -37,4 +37,5 @@ const productSchema = new mongoose.Schema({
   isBestSeller: { type: Boolean, default: false }
 }, { timestamps: true });
 
-module.exports = mongoose.models.product || mongoose.model("product", productSchema);
+// ✅ FIXED: Register model with uppercase "Product"
+module.exports = mongoose.models.Product || mongoose.model("Product", productSchema);
