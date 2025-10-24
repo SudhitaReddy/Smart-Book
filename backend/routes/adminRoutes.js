@@ -26,11 +26,21 @@ router.get("/dashboard", protect, authorize("admin"), async (req, res) => {
     const totalOrders = await Order.countDocuments();
 
     // ✅ Adjust according to your real schema fields
-    const revenueAgg = await Order.aggregate([
-      { $match: { status: "completed" } }, // or paymentStatus: "paid"
-      { $group: { _id: null, total: { $sum: "$amount" } } } // or totalAmount
-    ]);
-    const totalRevenue = revenueAgg[0]?.total || 0;
+const revenueAgg = await Order.aggregate([
+  {
+    $match: {
+      status: { $in: ["completed", "Completed", "delivered", "success"] }
+    }
+  },
+  {
+    $group: {
+      _id: null,
+      total: { $sum: { $toDouble: "$finalAmount" } }
+    }
+  }
+]);
+
+const totalRevenue = revenueAgg[0]?.total || 0;
 
     const recentOrders = await Order.find()
       .sort({ createdAt: -1 })

@@ -260,8 +260,7 @@ router.post("/send-otp-email", async (req, res) => {
   }
 });
 
-// Verify OTP and Register
-// Verify OTP and Register
+
 // Verify OTP and Register
 router.post("/verify-otp-email", async (req, res) => {
   try {
