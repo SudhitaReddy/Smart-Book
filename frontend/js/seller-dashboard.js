@@ -1,7 +1,8 @@
 // ===============================
 // Seller Dashboard Functionality
 // ===============================
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://smart-book-172w.onrender.com/api';
+
 
 let currentSection = 'dashboard';
 let charts = {};

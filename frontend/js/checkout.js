@@ -7,7 +7,7 @@ let selectedPaymentMethod = "cod";
 let cartData = null;    // { _id, items[], subtotal, discount, totalItems }
 let orderData = null;
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = 'https://smart-book-172w.onrender.com/api';
 const CART_PAGE_URL = "cart.html"; // Back-to-cart target
 
 // ===============================
