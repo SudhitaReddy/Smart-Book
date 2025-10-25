@@ -233,7 +233,7 @@ router.post("/send-otp-email", async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        redirect: "/login.html",
+        redirect: "./login.html",
         message: "Account already exists. Please login.",
       });
     }
