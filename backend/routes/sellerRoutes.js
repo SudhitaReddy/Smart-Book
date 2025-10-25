@@ -1,83 +1,48 @@
+// routes/seller.js
 const express = require("express");
 const router = express.Router();
 const { protect, authorize } = require("../middleware/auth");
+const {
+  getAll,
+  getById,
+  updateStatus,
+  updateCommission,
+  toggleActive,
+} = require("../controllers/sellerController");
+
 const Seller = require("../models/seller");
-const SellerRequest = require("../models/sellerRequest");
 const Product = require("../models/product");
 const Order = require("../models/order");
-const User = require("../models/user");
-const sendMail = require("../utils/sendEmail");
 
-// ===============================
-// SELLER REQUEST (Become a Seller)
-// ===============================
-router.post("/request", protect, async (req, res) => {
-  try {
-    const existingRequest = await SellerRequest.findOne({
-      user: req.user._id,
-      status: { $in: ["pending", "under_review"] }
-    });
+/* ===============================
+   ADMIN CONTROLS (MANAGE SELLERS)
+================================ */
 
-    if (existingRequest) {
-      return res.status(400).json({
-        success: false,
-        message: "You already have a pending seller request"
-      });
-    }
+// 👑 Get all sellers
+router.get("/", protect, authorize("admin"), getAll);
 
-    const request = new SellerRequest({
-      user: req.user._id,
-      businessName: req.body.businessName,
-      businessType: req.body.businessType,
-      description: req.body.description,
-      businessAddress: req.body.businessAddress,
-      contactInfo: req.body.contactInfo,
-      documents: req.body.documents
-    });
+// 👑 Get specific seller by ID
+router.get("/:id", protect, authorize("admin"), getById);
 
-    await request.save();
+// 👑 Update seller status (active, inactive, etc.)
+router.put("/:id/status", protect, authorize("admin"), updateStatus);
 
-    // Notify user via email
-    const user = await User.findById(req.user._id).select("name email");
-    if (user?.email) {
-      await sendMail({
-        to: user.email,
-        subject: "Seller Request Submitted",
-        html: `<h3>Hi ${user.name},</h3>
-               <p>Your seller request has been submitted and is pending review.</p>
-               <p>You will be notified once approved or rejected.</p>`
-      });
-    }
+// 👑 Update commission rate
+router.put("/:id/commission", protect, authorize("admin"), updateCommission);
 
-    res.json({ success: true, message: "Seller request submitted", data: request });
-  } catch (err) {
-    console.error("❌ Seller request error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
+// 👑 Toggle seller active/inactive
+router.put("/:id/toggle", protect, authorize("admin"), toggleActive);
 
-// ===============================
-// USER: View my seller request
-// ===============================
-router.get("/my-request", protect, async (req, res) => {
-  try {
-    const request = await SellerRequest.findOne({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json({ success: true, data: request });
-  } catch (err) {
-    console.error("❌ Get my request error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
+/* ===============================
+   SELLER DASHBOARD (SELF)
+================================ */
 
-// ===============================
-// SELLER DASHBOARD + STATS
-// ===============================
-async function getSellerStats(req, res) {
+// 📊 Get seller stats
+router.get("/dashboard", protect, authorize("seller", "admin"), async (req, res) => {
   try {
     const seller = await Seller.findOne({ user: req.user._id });
-    if (!seller) {
+    if (!seller)
       return res.status(404).json({ success: false, message: "Seller profile not found" });
-    }
 
     res.json({
       success: true,
@@ -86,33 +51,30 @@ async function getSellerStats(req, res) {
         totalProducts: seller.stats?.totalProducts || 0,
         totalSales: seller.stats?.totalSales || 0,
         totalRevenue: seller.stats?.totalRevenue || 0,
-        averageRating: seller.stats?.averageRating || 0
-      }
+        averageRating: seller.stats?.averageRating || 0,
+      },
     });
   } catch (err) {
-    console.error("❌ Seller stats error:", err);
+    console.error("❌ Dashboard error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
-}
+});
 
-// Dashboard routes
-router.get("/dashboard", protect, authorize("seller", "admin"), getSellerStats);
-router.get("/stats", protect, authorize("seller", "admin"), getSellerStats);
+/* ===============================
+   SELLER PRODUCT MANAGEMENT
+================================ */
 
-// ===============================
-// MANAGE PRODUCTS
-// ===============================
-
-// ➕ Add Product
+// ➕ Add product
 router.post("/products", protect, authorize("seller", "admin"), async (req, res) => {
   try {
     const seller = await Seller.findOne({ user: req.user._id });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller profile not found" });
+    if (!seller)
+      return res.status(404).json({ success: false, message: "Seller profile not found" });
 
     const product = await Product.create({
       ...req.body,
       seller: seller._id,
-      imageUrl: req.body.imageUrl || null
+      imageUrl: req.body.imageUrl || null,
     });
 
     seller.stats.totalProducts = (seller.stats.totalProducts || 0) + 1;
@@ -125,11 +87,12 @@ router.post("/products", protect, authorize("seller", "admin"), async (req, res)
   }
 });
 
-// 📦 Get all products for seller
+// 📦 Get all seller products
 router.get("/products", protect, authorize("seller", "admin"), async (req, res) => {
   try {
     const seller = await Seller.findOne({ user: req.user._id });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller profile not found" });
+    if (!seller)
+      return res.status(404).json({ success: false, message: "Seller profile not found" });
 
     const products = await Product.find({ seller: seller._id });
     res.json({ success: true, data: { products } });
@@ -139,35 +102,21 @@ router.get("/products", protect, authorize("seller", "admin"), async (req, res) 
   }
 });
 
-// 📖 Get single product
-router.get("/products/:id", protect, authorize("seller", "admin"), async (req, res) => {
-  try {
-    const seller = await Seller.findOne({ user: req.user._id });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller profile not found" });
-
-    const product = await Product.findOne({ _id: req.params.id, seller: seller._id });
-    if (!product) return res.status(404).json({ success: false, message: "Product not found" });
-
-    res.json({ success: true, data: { product } });
-  } catch (err) {
-    console.error("❌ Get single product error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// ✏️ Update Product
+// ✏️ Update product
 router.put("/products/:id", protect, authorize("seller", "admin"), async (req, res) => {
   try {
     const seller = await Seller.findOne({ user: req.user._id });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller profile not found" });
+    if (!seller)
+      return res.status(404).json({ success: false, message: "Seller profile not found" });
 
     const product = await Product.findOneAndUpdate(
       { _id: req.params.id, seller: seller._id },
-      { ...req.body, imageUrl: req.body.imageUrl || undefined },
+      req.body,
       { new: true }
     );
 
-    if (!product) return res.status(404).json({ success: false, message: "Product not found" });
+    if (!product)
+      return res.status(404).json({ success: false, message: "Product not found" });
 
     res.json({ success: true, message: "Product updated", data: { product } });
   } catch (err) {
@@ -176,14 +125,20 @@ router.put("/products/:id", protect, authorize("seller", "admin"), async (req, r
   }
 });
 
-// ❌ Delete Product
+// ❌ Delete product
 router.delete("/products/:id", protect, authorize("seller", "admin"), async (req, res) => {
   try {
     const seller = await Seller.findOne({ user: req.user._id });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller profile not found" });
+    if (!seller)
+      return res.status(404).json({ success: false, message: "Seller profile not found" });
 
-    const product = await Product.findOneAndDelete({ _id: req.params.id, seller: seller._id });
-    if (!product) return res.status(404).json({ success: false, message: "Product not found" });
+    const product = await Product.findOneAndDelete({
+      _id: req.params.id,
+      seller: seller._id,
+    });
+
+    if (!product)
+      return res.status(404).json({ success: false, message: "Product not found" });
 
     seller.stats.totalProducts = Math.max((seller.stats.totalProducts || 1) - 1, 0);
     await seller.save();
@@ -195,24 +150,25 @@ router.delete("/products/:id", protect, authorize("seller", "admin"), async (req
   }
 });
 
-// ===============================
-// VIEW ORDERS
-// ===============================
+/* ===============================
+   SELLER ORDERS
+================================ */
 router.get("/orders", protect, authorize("seller", "admin"), async (req, res) => {
   try {
     const seller = await Seller.findOne({ user: req.user._id });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller profile not found" });
+    if (!seller)
+      return res.status(404).json({ success: false, message: "Seller profile not found" });
 
-    const orders = await Order.find({ "items.seller": seller._id })
-      .populate("user", "name email");
+    const orders = await Order.find({ "items.seller": seller._id }).populate(
+      "user",
+      "name email"
+    );
 
     res.json({ success: true, data: { orders } });
   } catch (err) {
-    console.error("❌ Seller orders error:", err);
+    console.error("❌ Orders error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
-
 
 module.exports = router;

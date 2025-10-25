@@ -3,7 +3,7 @@ const User = require("../models/user");
 const sendMail = require("../utils/sendEmail");
 
 /* ===============================
-   Get all sellers
+   Get all sellers (Admin)
 ================================ */
 const getAll = async (req, res) => {
   try {
@@ -35,11 +35,10 @@ const getById = async (req, res) => {
 };
 
 /* ===============================
-   Create seller request (user action)
+   Create seller request (User)
 ================================ */
 const createRequest = async (req, res) => {
   try {
-    // prevent duplicates while pending/under review
     const existing = await Seller.findOne({
       user: req.user._id,
       status: { $in: ["pending", "under_review"] }
@@ -57,30 +56,37 @@ const createRequest = async (req, res) => {
 
     const user = await User.findById(req.user._id).select("name email");
 
-    // email seller
+    // ✅ Send confirmation email to user
     if (user?.email) {
       await sendMail({
         to: user.email,
         subject: "📩 Seller Request Received",
         html: `
           <h3>Hi ${user.name},</h3>
-          <p>Thanks for applying to become a seller.</p>
-          <p>Your request is <b>pending review</b> by our admin team.</p>
+          <p>Thank you for applying to become a seller.</p>
+          <p>Your request is <b>pending review</b>.</p>
         `
       });
     }
 
-    // email admin
+    // ✅ Send admin email with Approve/Reject buttons
     if (process.env.ADMIN_EMAIL) {
+      const approveUrl = `${process.env.REACT_APP_API_URL}/api/seller/approve/${request._id}`;
+      const rejectUrl = `${process.env.REACT_APP_API_URL}/api/seller/reject/${request._id}`;
+
       await sendMail({
         to: process.env.ADMIN_EMAIL,
         subject: "⚡ New Seller Request Submitted",
         html: `
           <h3>New Seller Request</h3>
           <p><b>User:</b> ${user?.name} (${user?.email})</p>
-          <p><b>Business Name:</b> ${req.body.businessName || "-"}</p>
-          <p>Status: Pending</p>
-          <p>Login to your admin dashboard to review this request.</p>
+          <p><b>Business:</b> ${req.body.businessName || "-"}</p>
+          <p>Status: <b>Pending</b></p>
+          <div style="margin-top:10px;">
+            <a href="${approveUrl}" style="background:#4CAF50;color:white;padding:8px 12px;text-decoration:none;border-radius:5px;">✅ Approve</a>
+            <a href="${rejectUrl}" style="background:#F44336;color:white;padding:8px 12px;text-decoration:none;border-radius:5px;margin-left:10px;">❌ Reject</a>
+          </div>
+          <p style="margin-top:10px;">Click one of the buttons above to process the request instantly.</p>
         `
       });
     }
@@ -93,7 +99,7 @@ const createRequest = async (req, res) => {
 };
 
 /* ===============================
-   Get pending seller requests (admin)
+   Get pending seller requests (Admin)
 ================================ */
 const getRequests = async (req, res) => {
   try {
@@ -108,7 +114,7 @@ const getRequests = async (req, res) => {
 };
 
 /* ===============================
-   Approve seller request (admin)
+   Approve seller request (Admin)
 ================================ */
 const approveRequest = async (req, res) => {
   try {
@@ -124,6 +130,7 @@ const approveRequest = async (req, res) => {
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
 
+    // ✅ Send approval email to user
     if (seller.user?.email) {
       await sendMail({
         to: seller.user.email,
@@ -144,7 +151,7 @@ const approveRequest = async (req, res) => {
 };
 
 /* ===============================
-   Reject seller request (admin)
+   Reject seller request (Admin)
 ================================ */
 const rejectRequest = async (req, res) => {
   try {
@@ -156,6 +163,7 @@ const rejectRequest = async (req, res) => {
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
 
+    // ✅ Send rejection email
     if (seller.user?.email) {
       await sendMail({
         to: seller.user.email,
@@ -176,7 +184,7 @@ const rejectRequest = async (req, res) => {
 };
 
 /* ===============================
-   Extra admin actions used by routes
+   Extra admin actions
 ================================ */
 const updateStatus = async (req, res) => {
   try {
@@ -213,7 +221,7 @@ const toggleActive = async (req, res) => {
 };
 
 /* ===============================
-   Exports (single consistent style)
+   Exports
 ================================ */
 module.exports = {
   getAll,
