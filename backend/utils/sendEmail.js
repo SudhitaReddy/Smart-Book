@@ -1,33 +1,27 @@
-const nodemailer = require("nodemailer");
+const Brevo = require("@getbrevo/brevo");
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp-relay.brevo.com", // ✅ Brevo SMTP host
-  port: process.env.EMAIL_PORT || 587,
-  secure: false, // Brevo uses TLS on port 587
-  auth: {
-    user: process.env.EMAIL_USER, // ✅ Your Brevo login (e.g., 99fd98001@smtp-brevo.com)
-    pass: process.env.EMAIL_PASS, // ✅ Your Brevo SMTP key
-  },
-});
+const brevoApi = new Brevo.TransactionalEmailsApi();
+brevoApi.authentications['apiKey'].apiKey = process.env.BREVO_API_KEY;
 
-// ✅ Universal email sender
+// ✅ Universal email sender using Brevo API (works on Render)
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    if (!to) {
-      throw new Error("❌ No recipient email provided to sendEmail()");
-    }
+    if (!to) throw new Error("No recipient email provided");
 
-    const info = await transporter.sendMail({
-      from: `"SmartBook" <${process.env.EMAIL_USER}>`, // Branded sender name
-      to: String(to).trim(),
-      subject,
-      html,
-    });
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
+    sendSmtpEmail.sender = {
+      name: "Smart Book",
+      email: "sudhitareddy582@gmail.com", // must be your verified Brevo sender
+    };
+    sendSmtpEmail.to = [{ email: to }];
+    sendSmtpEmail.subject = subject;
+    sendSmtpEmail.htmlContent = html;
 
-    console.log(`✅ Email sent to ${to}: MessageId ${info.messageId}`);
-    return info;
+    const response = await brevoApi.sendTransacEmail(sendSmtpEmail);
+    console.log(`✅ Email sent to ${to}:`, response.messageId || "Success");
+    return response;
   } catch (error) {
-    console.error("❌ Email sending failed:", error);
+    console.error("❌ Brevo email failed:", error.response?.text || error.message);
     throw error;
   }
 };
