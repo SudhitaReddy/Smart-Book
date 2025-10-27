@@ -159,7 +159,7 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting...";
 
-      const res = await fetch(`${API_BASE_URL}/seller/request`, {
+      const res = await fetch(`${API_BASE_URL}/seller-requests/request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
