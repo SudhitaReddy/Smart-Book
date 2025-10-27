@@ -1,4 +1,5 @@
 const Seller = require("../models/seller");
+const SellerRequest = require("../models/sellerRequest");
 const User = require("../models/user");
 const sendMail = require("../utils/sendEmail");
 
@@ -26,7 +27,10 @@ const getById = async (req, res) => {
       .populate("user", "name email mobile role isActive")
       .populate("verificationStatus.verifiedBy", "name email");
 
-    if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
+    if (!seller)
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
 
     res.json({ success: true, data: { seller } });
   } catch (err) {
@@ -39,24 +43,29 @@ const getById = async (req, res) => {
 ================================ */
 const createRequest = async (req, res) => {
   try {
-    const existing = await Seller.findOne({
+    // Check if already has pending/under review
+    const existing = await SellerRequest.findOne({
       user: req.user._id,
-      status: { $in: ["pending", "under_review"] }
+      status: { $in: ["pending", "under_review"] },
     });
     if (existing) {
-      return res.status(400).json({ success: false, message: "You already have a pending request" });
+      return res.status(400).json({
+        success: false,
+        message: "You already have a pending request",
+      });
     }
 
-    const request = new Seller({
+    // Create new request
+    const request = new SellerRequest({
       user: req.user._id,
       status: "pending",
-      ...req.body
+      ...req.body,
     });
     await request.save();
 
     const user = await User.findById(req.user._id).select("name email");
 
-    // ✅ Send confirmation email to user
+    // Notify user
     if (user?.email) {
       await sendMail({
         to: user.email,
@@ -65,14 +74,14 @@ const createRequest = async (req, res) => {
           <h3>Hi ${user.name},</h3>
           <p>Thank you for applying to become a seller.</p>
           <p>Your request is <b>pending review</b>.</p>
-        `
+        `,
       });
     }
 
-    // ✅ Send admin email with Approve/Reject buttons
+    // Notify admin
     if (process.env.ADMIN_EMAIL) {
-      const approveUrl = `${process.env.REACT_APP_API_URL}/api/seller/approve/${request._id}`;
-      const rejectUrl = `${process.env.REACT_APP_API_URL}/api/seller/reject/${request._id}`;
+      const approveUrl = `${process.env.REACT_APP_API_URL}/api/seller-requests/requests/${request._id}/approve`;
+      const rejectUrl = `${process.env.REACT_APP_API_URL}/api/seller-requests/requests/${request._id}/reject`;
 
       await sendMail({
         to: process.env.ADMIN_EMAIL,
@@ -87,28 +96,38 @@ const createRequest = async (req, res) => {
             <a href="${rejectUrl}" style="background:#F44336;color:white;padding:8px 12px;text-decoration:none;border-radius:5px;margin-left:10px;">❌ Reject</a>
           </div>
           <p style="margin-top:10px;">Click one of the buttons above to process the request instantly.</p>
-        `
+        `,
       });
     }
 
-    res.json({ success: true, message: "Seller request submitted", data: request });
+    res.json({
+      success: true,
+      message: "Seller request submitted successfully",
+      data: request,
+    });
   } catch (err) {
     console.error("❌ Seller request error:", err);
-    res.status(500).json({ success: false, message: "Server error while submitting request" });
+    res.status(500).json({
+      success: false,
+      message: err.message || "Server error while submitting request",
+    });
   }
 };
 
 /* ===============================
-   Get pending seller requests (Admin)
+   Get all pending/under review requests (Admin)
 ================================ */
 const getRequests = async (req, res) => {
   try {
-    const requests = await Seller.find({ status: { $in: ["pending", "under_review"] } })
+    const requests = await SellerRequest.find({
+      status: { $in: ["pending", "under_review"] },
+    })
       .populate("user", "name email")
       .sort({ createdAt: -1 });
 
     res.json({ success: true, data: { requests } });
   } catch (err) {
+    console.error("❌ Get seller requests error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -118,34 +137,52 @@ const getRequests = async (req, res) => {
 ================================ */
 const approveRequest = async (req, res) => {
   try {
-    const seller = await Seller.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: "approved",
-        "verificationStatus.isVerified": true,
-        "verificationStatus.verifiedAt": new Date()
-      },
-      { new: true }
-    ).populate("user", "name email");
+    const request = await SellerRequest.findById(req.params.id).populate(
+      "user",
+      "name email"
+    );
+    if (!request)
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller request not found" });
 
-    if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
+    // Mark as approved
+    request.status = "approved";
+    request.reviewedAt = new Date();
+    await request.save();
 
-    // ✅ Send approval email to user
-    if (seller.user?.email) {
+    // Create seller profile
+    await Seller.create({
+      user: request.user._id,
+      businessName: request.businessName,
+      businessType: request.businessType,
+      description: request.description,
+      businessAddress: request.businessAddress,
+      contactInfo: request.contactInfo,
+      documents: request.documents,
+      status: "approved",
+    });
+
+    // Notify user
+    if (request.user?.email) {
       await sendMail({
-        to: seller.user.email,
+        to: request.user.email,
         subject: "✅ Seller Request Approved",
         html: `
-          <h3>Hello ${seller.user.name},</h3>
+          <h3>Hello ${request.user.name},</h3>
           <p>Your seller request has been <b>approved</b>.</p>
           <p>You can now access your <a href="${process.env.CLIENT_URL}/seller-dashboard.html">Seller Dashboard</a>.</p>
-        `
+        `,
       });
     }
 
-    res.json({ success: true, message: "Seller approved", data: { seller } });
+    res.json({
+      success: true,
+      message: "Seller request approved successfully",
+      data: request,
+    });
   } catch (err) {
-    console.error("❌ Approve request error:", err);
+    console.error("❌ Approve seller request error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -155,42 +192,58 @@ const approveRequest = async (req, res) => {
 ================================ */
 const rejectRequest = async (req, res) => {
   try {
-    const seller = await Seller.findByIdAndUpdate(
-      req.params.id,
-      { status: "rejected", notes: req.body.reason || "Rejected by admin" },
-      { new: true }
-    ).populate("user", "name email");
+    const request = await SellerRequest.findById(req.params.id).populate(
+      "user",
+      "name email"
+    );
+    if (!request)
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller request not found" });
 
-    if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
+    request.status = "rejected";
+    request.reviewNotes = req.body.reason || "Rejected by admin";
+    await request.save();
 
-    // ✅ Send rejection email
-    if (seller.user?.email) {
+    // Notify user
+    if (request.user?.email) {
       await sendMail({
-        to: seller.user.email,
+        to: request.user.email,
         subject: "❌ Seller Request Rejected",
         html: `
-          <h3>Hello ${seller.user.name},</h3>
+          <h3>Hello ${request.user.name},</h3>
           <p>Unfortunately, your seller request was <b>rejected</b>.</p>
           <p>Reason: ${req.body.reason || "Not specified"}</p>
-        `
+        `,
       });
     }
 
-    res.json({ success: true, message: "Seller rejected", data: { seller } });
+    res.json({
+      success: true,
+      message: "Seller request rejected successfully",
+      data: request,
+    });
   } catch (err) {
-    console.error("❌ Reject request error:", err);
+    console.error("❌ Reject seller request error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
 /* ===============================
-   Extra admin actions
+   Admin Utility: Update Status, Commission, Active
 ================================ */
 const updateStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const seller = await Seller.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
+    const seller = await Seller.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!seller)
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     res.json({ success: true, data: { seller } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -200,8 +253,15 @@ const updateStatus = async (req, res) => {
 const updateCommission = async (req, res) => {
   try {
     const { commissionRate } = req.body;
-    const seller = await Seller.findByIdAndUpdate(req.params.id, { commissionRate }, { new: true });
-    if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
+    const seller = await Seller.findByIdAndUpdate(
+      req.params.id,
+      { commissionRate },
+      { new: true }
+    );
+    if (!seller)
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     res.json({ success: true, data: { seller } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -211,7 +271,10 @@ const updateCommission = async (req, res) => {
 const toggleActive = async (req, res) => {
   try {
     const seller = await Seller.findById(req.params.id);
-    if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
+    if (!seller)
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     seller.isActive = !seller.isActive;
     await seller.save();
     res.json({ success: true, data: { seller } });
@@ -232,5 +295,5 @@ module.exports = {
   rejectRequest,
   updateStatus,
   updateCommission,
-  toggleActive
+  toggleActive,
 };

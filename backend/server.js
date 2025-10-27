@@ -64,17 +64,17 @@ app.get("/test-email", async (req, res) => {
 });
 
 // ================================
-// Routes
+// ✅ ROUTES (Fixed Mounting)
 // ================================
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/orders", require("./routes/orders"));
-app.use("/api/seller", require("./routes/sellerRoutes"));
-app.use("/api/seller", require("./routes/sellerRequestRoutes"));
 app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
+app.use("/api/seller", require("./routes/sellerRoutes")); 
+app.use("/api/seller-requests", require("./routes/sellerRequestRoutes"));
 
 // ================================
 // Insert / Refresh books on startup
